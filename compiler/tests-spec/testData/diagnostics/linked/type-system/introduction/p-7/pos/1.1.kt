@@ -1,4 +1,3 @@
-// !CHECK_TYPE
 // !DIAGNOSTICS: -UNUSED_VARIABLE -ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE -UNUSED_VALUE -UNUSED_PARAMETER
 // !LANGUAGE: +NewInference
 // SKIP_TXT
@@ -11,6 +10,7 @@
  * RELEVANT PLACES: expressions, constant-literals, real-literals -> paragraph 1 -> sentence 1
  * NUMBER: 1
  * DESCRIPTION: The use of Boolean literals as the identifier (with backtick) in the class.
+ * HELPERS: checkType
  */
 
 // TESTCASE NUMBER: 1

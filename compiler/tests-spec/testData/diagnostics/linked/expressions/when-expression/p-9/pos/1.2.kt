@@ -1,5 +1,3 @@
-// !CHECK_TYPE
-
 /*
  * KOTLIN DIAGNOSTICS SPEC TEST (POSITIVE)
  *
@@ -7,7 +5,7 @@
  * PLACE: expressions, when-expression -> paragraph 9 -> sentence 1
  * NUMBER: 2
  * DESCRIPTION: 'When' least upper bound of the types check (when exhaustive via enum).
- * HELPERS: classes, enumClasses
+ * HELPERS: classes, enumClasses, checkType
  */
 
 // TESTCASE NUMBER: 1
@@ -19,7 +17,7 @@ fun case_1(value_1: EnumClass): String {
         EnumClass.WEST -> ClassLevel5()
     }
 
-    whenValue checkType { _<ClassLevel2>() }
+    whenValue checkType { check<ClassLevel2>() }
     checkSubtype<ClassLevel1>(whenValue)
 
     return ""
@@ -35,7 +33,7 @@ fun case_2(value_1: EnumClass?): String {
         null -> ClassLevel6()
     }
 
-    whenValue checkType { _<ClassLevel2>() }
+    whenValue checkType { check<ClassLevel2>() }
     checkSubtype<ClassLevel1>(whenValue)
 
     return ""
@@ -50,7 +48,7 @@ fun case_3(value_1: EnumClass): String {
         EnumClass.WEST -> <!IMPLICIT_CAST_TO_ANY!>object<!> {}
     }
 
-    whenValue checkType { _<Any>() }
+    whenValue checkType { check<Any>() }
     checkSubtype<Any>(whenValue)
 
     return ""
@@ -66,7 +64,7 @@ fun case_4(value_1: EnumClass?): String {
         null -> <!IMPLICIT_CAST_TO_ANY!>false<!>
     }
 
-    whenValue checkType { _<Any>() }
+    whenValue checkType { check<Any>() }
     checkSubtype<Any>(whenValue)
 
     return ""

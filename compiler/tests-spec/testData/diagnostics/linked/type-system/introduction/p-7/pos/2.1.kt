@@ -1,4 +1,3 @@
-// !CHECK_TYPE
 // !DIAGNOSTICS: -UNUSED_VARIABLE -UNREACHABLE_CODE
 // !LANGUAGE: +NewInference
 // SKIP_TXT
@@ -10,6 +9,7 @@
  * PLACE: type-system, introduction -> paragraph 7 -> sentence 2
  * NUMBER: 1
  * DESCRIPTION: The use of Boolean literals as the identifier (with backtick) in the class.
+ * HELPERS: checkType
  */
 
 // TESTCASE NUMBER: 1

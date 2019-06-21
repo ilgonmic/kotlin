@@ -1,4 +1,3 @@
-// !CHECK_TYPE
 // SKIP_TXT
 
 /*
@@ -8,6 +7,7 @@
  * PLACE: expressions, constant-literals, integer-literals, long-integer-literals -> paragraph 1 -> sentence 2
  * NUMBER: 5
  * DESCRIPTION: Check of integer type selection depends on the context.
+ * HELPERS: checkType
  */
 
 // FILE: functions.kt

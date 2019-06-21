@@ -5,9 +5,14 @@
 
 package org.jetbrains.kotlin.spec.tasks
 
+import org.jetbrains.kotlin.checkers.AbstractDiagnosticsTestSpec
+import org.jetbrains.kotlin.codegen.AbstractBlackBoxCodegenTestSpec
+import org.jetbrains.kotlin.generators.tests.generator.testGroup
+import org.jetbrains.kotlin.parsing.AbstractParsingTestSpec
 import org.jetbrains.kotlin.spec.models.LinkedSpecTest
 import org.jetbrains.kotlin.spec.parsers.CommonParser
 import org.jetbrains.kotlin.spec.utils.GeneralConfiguration.TESTDATA_PATH
+import org.jetbrains.kotlin.spec.utils.GeneralConfiguration.TEST_PATH
 import java.io.File
 import java.lang.StringBuilder
 
@@ -112,18 +117,18 @@ object TestsMapGenerator {
 }
 
 fun generateTests() {
-    TestsMapGenerator.buildTestsMapPerSection()
-//    testGroup(TEST_PATH, TESTDATA_PATH) {
-//        testClass<AbstractDiagnosticsTestSpec> {
-//            model("diagnostics", excludeDirs = listOf("helpers"))
-//        }
-//        testClass<AbstractParsingTestSpec> {
-//            model("psi", testMethod = "doParsingTest", excludeDirs = listOf("helpers", "templates"))
-//        }
-//        testClass<AbstractBlackBoxCodegenTestSpec> {
-//            model("codegen/box", excludeDirs = listOf("helpers", "templates"))
-//        }
-//    }
+//    TestsMapGenerator.buildTestsMapPerSection()
+    testGroup(TEST_PATH, TESTDATA_PATH) {
+        testClass<AbstractDiagnosticsTestSpec> {
+            model("diagnostics", excludeDirs = listOf("helpers"))
+        }
+        testClass<AbstractParsingTestSpec> {
+            model("psi", testMethod = "doParsingTest", excludeDirs = listOf("helpers", "templates"))
+        }
+        testClass<AbstractBlackBoxCodegenTestSpec> {
+            model("codegen/box", excludeDirs = listOf("helpers", "templates"))
+        }
+    }
 }
 
 fun main() = generateTests()

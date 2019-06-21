@@ -1,5 +1,3 @@
-// !CHECK_TYPE
-
 /*
  * KOTLIN DIAGNOSTICS SPEC TEST (POSITIVE)
  *
@@ -7,7 +5,7 @@
  * PLACE: expressions, when-expression -> paragraph 9 -> sentence 1
  * NUMBER: 3
  * DESCRIPTION: 'When' least upper bound of the types check (when exhaustive via boolean bound value).
- * HELPERS: classes
+ * HELPERS: classes, checkType
  */
 
 // TESTCASE NUMBER: 1
@@ -17,7 +15,7 @@ fun case_1(value_1: Boolean): String {
         false -> ClassLevel3()
     }
 
-    whenValue checkType { _<ClassLevel2>() }
+    whenValue checkType { check<ClassLevel2>() }
     checkSubtype<ClassLevel1>(whenValue)
 
     return ""
@@ -31,7 +29,7 @@ fun case_2(value_1: Boolean?): String {
         null -> ClassLevel4()
     }
 
-    whenValue checkType { _<ClassLevel2>() }
+    whenValue checkType { check<ClassLevel2>() }
     checkSubtype<ClassLevel1>(whenValue)
 
     return ""
@@ -45,7 +43,7 @@ fun case_3(value_1: Boolean): String {
         false -> <!IMPLICIT_CAST_TO_ANY!>object<!> {}
     }
 
-    whenValue checkType { _<Any>() }
+    whenValue checkType { check<Any>() }
     checkSubtype<Any>(whenValue)
 
     return ""
@@ -60,7 +58,7 @@ fun case_4(value_1: Boolean?): String {
         null -> <!IMPLICIT_CAST_TO_ANY!>object<!> {}
     }
 
-    whenValue checkType { _<Any>() }
+    whenValue checkType { check<Any>() }
     checkSubtype<Any>(whenValue)
 
     return ""

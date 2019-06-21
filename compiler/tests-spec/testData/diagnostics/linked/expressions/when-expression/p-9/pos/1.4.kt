@@ -1,5 +1,3 @@
-// !CHECK_TYPE
-
 /*
  * KOTLIN DIAGNOSTICS SPEC TEST (POSITIVE)
  *
@@ -7,7 +5,7 @@
  * PLACE: expressions, when-expression -> paragraph 9 -> sentence 1
  * NUMBER: 4
  * DESCRIPTION: 'When' least upper bound of the types check (when exhaustive via sealed class).
- * HELPERS: classes, sealedClasses
+ * HELPERS: classes, sealedClasses, checkType
  */
 
 // TESTCASE NUMBER: 1
@@ -18,7 +16,7 @@ fun case_1(value_1: SealedClass): String {
         is SealedChild3 -> ClassLevel4()
     }
 
-    whenValue checkType { _<ClassLevel2>() }
+    whenValue checkType { check<ClassLevel2>() }
     checkSubtype<ClassLevel1>(whenValue)
 
     return ""
@@ -33,7 +31,7 @@ fun case_2(value_1: SealedClass?): String {
         null -> ClassLevel5()
     }
 
-    whenValue checkType { _<ClassLevel2>() }
+    whenValue checkType { check<ClassLevel2>() }
     checkSubtype<ClassLevel1>(whenValue)
 
     return ""
@@ -47,7 +45,7 @@ fun case_3(value_1: SealedClass): String {
         is SealedChild3 -> <!IMPLICIT_CAST_TO_ANY!>object<!> {}
     }
 
-    whenValue checkType { _<Any>() }
+    whenValue checkType { check<Any>() }
     checkSubtype<Any>(whenValue)
 
     return ""
@@ -62,7 +60,7 @@ fun case_4(value_1: SealedClass?): String {
         null -> {<!IMPLICIT_CAST_TO_ANY!>{}<!>}
     }
 
-    whenValue checkType { _<Any>() }
+    whenValue checkType { check<Any>() }
     checkSubtype<Any>(whenValue)
 
     return ""
@@ -76,7 +74,7 @@ fun case_5(value_1: SealedClassWithObjects): String {
         SealedWithObjectsChild3 -> ClassLevel4()
     }
 
-    whenValue checkType { _<ClassLevel2>() }
+    whenValue checkType { check<ClassLevel2>() }
     checkSubtype<ClassLevel1>(whenValue)
 
     return ""
@@ -91,7 +89,7 @@ fun case_6(value_1: SealedClassWithObjects?): String {
         null -> ClassLevel5()
     }
 
-    whenValue checkType { _<ClassLevel2>() }
+    whenValue checkType { check<ClassLevel2>() }
     checkSubtype<ClassLevel1>(whenValue)
 
     return ""
@@ -105,7 +103,7 @@ fun case_7(value_1: SealedClassWithObjects): String {
         SealedWithObjectsChild3 -> <!IMPLICIT_CAST_TO_ANY!>object<!> {}
     }
 
-    whenValue checkType { _<Any>() }
+    whenValue checkType { check<Any>() }
     checkSubtype<Any>(whenValue)
 
     return ""
@@ -120,7 +118,7 @@ fun case_8(value_1: SealedClassWithObjects?): String {
         null -> {<!IMPLICIT_CAST_TO_ANY!>{}<!>}
     }
 
-    whenValue checkType { _<Any>() }
+    whenValue checkType { check<Any>() }
     checkSubtype<Any>(whenValue)
 
     return ""
@@ -132,7 +130,7 @@ fun case_9(value_1: SealedClassWithObjects): String {
         <!USELESS_IS_CHECK!>is SealedClassWithObjects<!> -> 10
     }
 
-    whenValue checkType { _<Int>() }
+    whenValue checkType { check<Int>() }
     checkSubtype<Int>(whenValue)
 
     return ""

@@ -8,6 +8,6 @@
  *     {testType: neg|pos}: {sentenceNumber}-{numberOfTests|testPathToAnotherSection}, ...
  */
 
-1
+2
     neg: 1-2
     pos: 1-3

@@ -4,7 +4,7 @@
  * KOTLIN DIAGNOSTICS SPEC TEST (NEGATIVE)
  *
  * SPEC VERSION: 0.1-draft
- * PLACE: expressions, when-expression -> paragraph 1 -> sentence 8
+ * PLACE: expressions, when-expression -> paragraph 2 -> sentence 8
  * NUMBER: 3
  * DESCRIPTION: Checking for not exhaustive 'when' on the nullable enums.
  * HELPERS: enumClasses

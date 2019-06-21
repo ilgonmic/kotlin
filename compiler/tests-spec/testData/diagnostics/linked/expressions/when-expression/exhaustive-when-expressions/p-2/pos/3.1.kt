@@ -2,21 +2,19 @@
  * KOTLIN DIAGNOSTICS SPEC TEST (POSITIVE)
  *
  * SPEC VERSION: 0.1-draft
- * PLACE: expressions, when-expression -> paragraph 1 -> sentence 8
+ * PLACE: expressions, when-expression -> paragraph 2 -> sentence 3
  * NUMBER: 1
- * DESCRIPTION: Check when exhaustive when boolean values are checked and contains a null check.
+ * DESCRIPTION: Check when exhaustive via boolean bound value and evaluating to value true and false.
  */
 
 // TESTCASE NUMBER: 1
-fun case_1(value_1: Boolean?): String = when (value_1) {
+fun case_1(value_1: Boolean): String = when (value_1) {
     true -> ""
     false -> ""
-    null -> ""
 }
 
 // TESTCASE NUMBER: 2
-fun case_2(value_1: Boolean?): String = when (value_1) {
+fun case_2(value_1: Boolean): String = when (value_1) {
     true && false && ((true || false)) || true && !!!false && !!!true -> ""
     true && false && ((true || false)) || true && !!!false -> ""
-    null -> ""
 }

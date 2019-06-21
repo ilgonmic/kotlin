@@ -2,7 +2,7 @@
  * KOTLIN DIAGNOSTICS SPEC TEST (POSITIVE)
  *
  * SPEC VERSION: 0.1-draft
- * PLACE: expressions, when-expression, exhaustive-when-expressions -> paragraph 1 -> sentence 1
+ * PLACE: expressions, when-expression, exhaustive-when-expressions -> paragraph 2 -> sentence 1
  * NUMBER: 1
  * DESCRIPTION: Check when exhaustive via else entry (when without bound value).
  */

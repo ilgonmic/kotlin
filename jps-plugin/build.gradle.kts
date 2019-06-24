@@ -31,9 +31,9 @@ dependencies {
         compileOnly(jpsStandalone()) { includeJars("jps-builders", "jps-builders-6") }
     }
     Platform[192].orHigher {
-        compileOnly(intellijPluginDep("java")) { includeJars("jps-builders", "jps-builders-6") }
-        testCompileOnly(intellijPluginDep("java")) { includeJars("jps-builders", "jps-builders-6") }
-        testRuntimeOnly(intellijPluginDep("java"))
+        compileOnly(intellijPluginDep("jps-standalone"))
+        testCompileOnly(intellijPluginDep("jps-standalone"))
+//        testRuntimeOnly(intellijPluginDep("jps-standalone"))
     }
 
     testCompileOnly(project(":kotlin-reflect-api"))

@@ -16,7 +16,7 @@ dependencies {
     }
 
     Platform[192].orHigher {
-        testRuntime(intellijCoreDep()) { includeJars("intellij-core") }
+        // TODO: plugin testRuntime(intellijCoreDep()) { includeJars("intellij-core") }
     }
 
     compile(project(":compiler:util"))

@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.ir.types.isPrimitiveType
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.util.*
 import org.jetbrains.kotlin.load.java.JvmAbi
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 /**
@@ -56,6 +57,13 @@ object InlineClassAbi {
      * to avoid clashes between overloaded methods.
      */
     fun mangledNameFor(irFunction: IrFunction): Name {
+        val suffix = when {
+            irFunction.fullValueParameterList.any { it.type.requiresMangling } ->
+                hashSuffix(irFunction)
+            (irFunction.parent as? IrClass)?.isInline == true -> "impl"
+            else -> return irFunction.name
+        }
+
         val base = when {
             irFunction is IrConstructor ->
                 "constructor"
@@ -69,15 +77,16 @@ object InlineClassAbi {
                 irFunction.name.asString()
         }
 
-        val suffix = when {
-            irFunction.fullValueParameterList.any { it.type.erasedUpperBound.isInline } ->
-                hashSuffix(irFunction)
-            (irFunction.parent as? IrClass)?.isInline == true -> "impl"
-            else -> return irFunction.name
-        }
-
         return Name.identifier("$base-$suffix")
     }
+
+    private val RESULT_FQ_NAME = FqName("kotlin.Result")
+
+    private val IrType.requiresMangling: Boolean
+        get() = erasedUpperBound.requiresMangling
+
+    private val IrClass.requiresMangling: Boolean
+        get() = isInline && fqNameWhenAvailable != RESULT_FQ_NAME
 
     private val IrFunction.propertyName: Name
         get() = (this as IrSimpleFunction).correspondingPropertySymbol!!.owner.name

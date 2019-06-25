@@ -7,9 +7,9 @@ plugins {
 dependencies {
     compile(project(":compiler:util"))
     compile(project(":compiler:frontend"))
-    compileOnly(intellijDep())
+    compileOnly(intellijDep()) { includeJars("jdom", "platform-api", "platform-impl", "extensions", "util") }
     Platform[192].orHigher {
-        compileOnly(intellijPluginDep("java"))
+        compileOnly(intellijPluginDep("java")) { includeJars("java-api") }
     }
 }
 

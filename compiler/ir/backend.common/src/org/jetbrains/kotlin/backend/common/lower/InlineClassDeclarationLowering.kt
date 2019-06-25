@@ -190,7 +190,7 @@ class InlineClassLowering(val context: BackendContext) {
                         return expression
                     }
 
-                    return irCall(expression, getOrCreateStaticMethod(function), dispatchReceiverAsFirstArgument = false)
+                    return irCall(expression, getOrCreateStaticMethod(function), receiversAsFirstArguments = false)
                 }
 
                 override fun visitCall(expression: IrCall): IrExpression {
@@ -208,7 +208,7 @@ class InlineClassLowering(val context: BackendContext) {
                     return irCall(
                         expression,
                         getOrCreateStaticMethod(function),
-                        dispatchReceiverAsFirstArgument = (function is IrSimpleFunction)
+                        receiversAsFirstArguments = (function is IrSimpleFunction)
                     )
                 }
 

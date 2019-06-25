@@ -43,15 +43,16 @@ open class KtUltraLightClass(classOrObject: KtClassOrObject, internal val suppor
 
     private class KtUltraLightClassModifierList(
         private val containingClass: KtLightClassForSourceDeclaration,
+        private val support: KtUltraLightSupport,
         private val computeModifiers: () -> Set<String>
     ) :
-        KtUltraLightModifierList<KtLightClassForSourceDeclaration>(containingClass) {
+        KtUltraLightModifierList<KtLightClassForSourceDeclaration>(containingClass, support) {
         private val modifiers by lazyPub { computeModifiers() }
 
         override fun hasModifierProperty(name: String): Boolean =
             if (name != PsiModifier.FINAL) name in modifiers else owner.isFinal(PsiModifier.FINAL in modifiers)
 
-        override fun copy(): PsiElement = KtUltraLightClassModifierList(containingClass, computeModifiers)
+        override fun copy(): PsiElement = KtUltraLightClassModifierList(containingClass, support, computeModifiers)
     }
 
 
@@ -90,7 +91,7 @@ open class KtUltraLightClass(classOrObject: KtClassOrObject, internal val suppor
     override fun getDelegate(): PsiClass = forTooComplex { super.getDelegate() }
 
     private val _modifierList: PsiModifierList? by lazyPub {
-        if (tooComplex) super.getModifierList() else KtUltraLightClassModifierList(this) { computeModifiers() }
+        if (tooComplex) super.getModifierList() else KtUltraLightClassModifierList(this, support) { computeModifiers() }
     }
 
     override fun getModifierList(): PsiModifierList? = _modifierList

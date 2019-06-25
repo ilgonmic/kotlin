@@ -7,6 +7,8 @@ package org.jetbrains.kotlin.idea.vcs
 
 import com.intellij.BundleBase.replaceMnemonicAmpersand
 import com.intellij.CommonBundle
+import com.intellij.ide.plugins.PluginManager
+import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.ui.Messages.NO
@@ -30,6 +32,10 @@ import javax.swing.JPanel
 private var Project.bunchFileCheckEnabled: Boolean by NotNullableUserDataProperty(Key.create("IS_BUNCH_FILE_CHECK_ENABLED"), true)
 
 class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
+    companion object {
+        val BUNCH_PLUGIN_ID = PluginId.getId("org.jetbrains.bunch.tool.idea.plugin")
+    }
+
     override fun createHandler(panel: CheckinProjectPanel, commitContext: CommitContext): CheckinHandler {
         return BunchCheckInHandler(panel)
     }
@@ -38,6 +44,7 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
         private val project get() = checkInProjectPanel.project
 
         override fun getBeforeCheckinConfigurationPanel(): RefreshableOnComponent? {
+            if (PluginManager.isPluginInstalled(BUNCH_PLUGIN_ID)) return null
             BunchFileUtils.bunchFile(project) ?: return null
 
             val bunchFilesCheckBox = NonFocusableCheckBox(replaceMnemonicAmpersand("Check &bunch files"))

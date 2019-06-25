@@ -33,7 +33,7 @@ private var Project.bunchFileCheckEnabled: Boolean by NotNullableUserDataPropert
 
 class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
     companion object {
-        val BUNCH_PLUGIN_ID = PluginId.getId("org.jetbrains.bunch.tool.idea.plugin")
+        private val BUNCH_PLUGIN_ID = PluginId.getId("org.jetbrains.bunch.tool.idea.plugin")
     }
 
     override fun createHandler(panel: CheckinProjectPanel, commitContext: CommitContext): CheckinHandler {

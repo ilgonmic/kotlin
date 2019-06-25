@@ -14,8 +14,7 @@ dependencies {
     compile(project(":plugins:uast-kotlin"))
     compileOnly(intellijDep())
     Platform[192].orHigher {
-        // TODO: Java
-        // compileOnly(intellijCoreDep()) { includeJars("intellij-core") }
+        compileOnly(intellijPluginDep("java"))
     }
 }
 

@@ -24,7 +24,6 @@ dependencies {
     testRuntimeOnly(intellijCoreDep()) { includeJars("intellij-core") }
 
     Platform[192].orHigher {
-        // TODO:
         testRuntimeOnly(intellijDep()) { includeJars("platform-concurrency") }
     }
 }

@@ -576,6 +576,16 @@ public class CliTestGenerated extends AbstractCliTest {
             runTest("compiler/testData/cli/jvm/singleJavaFileRoots.args");
         }
 
+        @TestMetadata("standaloneSamConversionsAreEnabledWithNewInference.args")
+        public void testStandaloneSamConversionsAreEnabledWithNewInference() throws Exception {
+            runTest("compiler/testData/cli/jvm/standaloneSamConversionsAreEnabledWithNewInference.args");
+        }
+
+        @TestMetadata("standaloneSamConversionsAreEnabledWithNewInferenceInternalFlag.args")
+        public void testStandaloneSamConversionsAreEnabledWithNewInferenceInternalFlag() throws Exception {
+            runTest("compiler/testData/cli/jvm/standaloneSamConversionsAreEnabledWithNewInferenceInternalFlag.args");
+        }
+
         @TestMetadata("suppressAllWarningsJvm.args")
         public void testSuppressAllWarningsJvm() throws Exception {
             runTest("compiler/testData/cli/jvm/suppressAllWarningsJvm.args");

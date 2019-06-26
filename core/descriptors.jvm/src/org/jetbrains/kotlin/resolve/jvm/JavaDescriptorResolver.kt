@@ -43,3 +43,9 @@ class JavaDescriptorResolver(
         return packageFragmentProvider.getPackageFragments(fqName.parent()).firstOrNull()?.findClassifierByJavaClass(javaClass)
     }
 }
+
+fun foo() {
+    val c = 0
+}
+fun foo2() {}
+fun foo3() {}

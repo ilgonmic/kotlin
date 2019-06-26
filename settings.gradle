@@ -284,8 +284,13 @@ if (flags.inJpsBuildIdeaSync) {
 
 rootProject.name = "kotlin"
 
-project(':kotlin-script-runtime').projectDir = "$rootDir/libraries/tools/script-runtime" as File
-project(':kotlin-test').projectDir = "$rootDir/libraries/kotlin.test" as File
+def includeProject(name, path) {
+    settings.include("name")
+    project(name).projectDir = new File(path)
+}
+
+includeProject(':kotlin-script-runtime', 'libraries/tools/script-runtime')
+includeProject(':kotlin-test', 'libraries/kotlin.test')
 project(':kotlin-test:kotlin-test-common').projectDir = "$rootDir/libraries/kotlin.test/common" as File
 project(':kotlin-test:kotlin-test-annotations-common').projectDir = "$rootDir/libraries/kotlin.test/annotations-common" as File
 project(':kotlin-test:kotlin-test-jvm').projectDir = "$rootDir/libraries/kotlin.test/jvm" as File

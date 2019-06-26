@@ -753,6 +753,25 @@ fun Project.configureJvmProject(javaHome: String, javaVersion: String) {
     tasks.withType<Test> {
         executable = File(javaHome, "bin/java").canonicalPath
     }
+
+    val p = this
+    plugins.withId("java-base") {
+
+        sourceSets.all {
+            val compileClasspathConfig = configurations.getByName(compileClasspathConfigurationName)
+            compileClasspathConfig.resolutionStrategy.dependencySubstitution {
+                all {
+                    when ((requested as? ProjectComponentSelector)?.projectPath) {
+                        ":kotlin-reflect" -> useTarget(project(":kotlin-reflect-api"))
+                        ":kotlin-compiler-embeddable" -> {
+                            println(p)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 tasks.create("findShadowJarsInClasspath").doLast {
@@ -760,8 +779,14 @@ tasks.create("findShadowJarsInClasspath").doLast {
         sortedBy { it.path }.forEach { println(indent + it.relativeTo(rootProject.projectDir)) }
     }
 
+    val mainJars = hashSetOf<File>()
     val shadowJars = hashSetOf<File>()
     for (project in rootProject.allprojects) {
+        // todo with kotlin plugin
+        project.withJavaPlugin {
+            println(project)
+            project.sourceSets.all { (project.tasks.findByPath(this.jarTaskName) as? Jar)?.archivePath?.let { mainJars.add(it) } }
+        }
         for (task in project.tasks) {
             when (task) {
                 is ShadowJar -> {
@@ -775,7 +800,8 @@ tasks.create("findShadowJarsInClasspath").doLast {
     }
 
     println("Shadow jars:")
-    shadowJars.printSorted()
+    shadowJars.removeAll(mainJars)
+    (shadowJars).printSorted()
 
     fun Project.checkConfig(configName: String) {
         val config = configurations.findByName(configName) ?: return
@@ -787,6 +813,7 @@ tasks.create("findShadowJarsInClasspath").doLast {
         }
     }
 
+    // todo check source sets
     for (project in rootProject.allprojects) {
         project.checkConfig("compileClasspath")
         project.checkConfig("testCompileClasspath")

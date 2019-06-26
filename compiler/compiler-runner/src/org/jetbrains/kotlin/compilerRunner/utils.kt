@@ -37,3 +37,6 @@ fun processCompilerOutput(
         reportInternalCompilerError(messageCollector)
     }
 }
+
+
+fun foo1() {}

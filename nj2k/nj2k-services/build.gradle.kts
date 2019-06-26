@@ -22,7 +22,7 @@ dependencies {
     compile(project(":kotlin-build-common"))
     compile(project(":daemon-common"))
     compile(projectRuntimeJar(":kotlin-daemon-client"))
-    compile(project(":kotlin-compiler-runner")) { isTransitive = false }
+    //compile(project(":kotlin-compiler-runner")) { isTransitive = false }
     compile(project(":compiler:plugin-api"))
     compile(project(":j2k"))
     compile(project(":nj2k"))

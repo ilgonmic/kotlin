@@ -16,7 +16,7 @@ dependencies {
     compileOnly(intellijCoreDep())
     runtime(project(":kotlin-compiler"))
     runtime(project(":kotlin-scripting-compiler"))
-    runtime(project(":kotlin-reflect"))
+    runtimeOnly(project(":kotlin-reflect"))
     runtime(commonDep("org.jetbrains.intellij.deps", "trove4j"))
 }
 

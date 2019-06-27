@@ -23,13 +23,19 @@ import kotlin.script.experimental.jvmhost.repl.JvmReplEvaluatorState
 
 class KotlinJsr223ScriptEngineImpl(
     factory: ScriptEngineFactory,
-    val compilationConfiguration: ScriptCompilationConfiguration,
+    baseCompilationConfiguration: ScriptCompilationConfiguration,
     baseEvaluationConfiguration: ScriptEvaluationConfiguration
 ) : KotlinJsr223JvmScriptEngineBase(factory), KotlinJsr223InvocableScriptEngine {
 
     val jsr223HostConfiguration = ScriptingHostConfiguration(defaultJvmScriptingHostConfiguration) {
         jsr223 {
             getScriptContext { getContext() }
+        }
+    }
+
+    val compilationConfiguration by lazy {
+        ScriptCompilationConfiguration(baseCompilationConfiguration) {
+            hostConfiguration(jsr223HostConfiguration)
         }
     }
 
@@ -42,6 +48,7 @@ class KotlinJsr223ScriptEngineImpl(
     override val replCompiler: ReplCompiler by lazy {
         JvmReplCompiler(compilationConfiguration)
     }
+
     private val localEvaluator by lazy {
         GenericReplCompilingEvaluatorBase(replCompiler, JvmReplEvaluator(evaluationConfiguration))
     }

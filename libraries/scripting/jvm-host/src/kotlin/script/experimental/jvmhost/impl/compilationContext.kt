@@ -89,14 +89,7 @@ internal fun createInitialConfigurations(
 
     kotlinCompilerConfiguration.add(
         ScriptingConfigurationKeys.SCRIPT_DEFINITIONS,
-        ScriptDefinition.FromLegacy(
-            hostConfiguration,
-            BridgeScriptDefinition(
-                scriptCompilationConfiguration,
-                hostConfiguration,
-                scriptCompilationState
-            )
-        )
+        ScriptDefinition.FromConfigurations(hostConfiguration, scriptCompilationConfiguration, null)
     )
 
     initialScriptCompilationConfiguration[ScriptCompilationConfiguration.compilerOptions]?.let { compilerOptions ->

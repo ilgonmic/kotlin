@@ -7,8 +7,6 @@ package org.jetbrains.kotlin.idea.perf
 
 import com.intellij.codeInsight.completion.CompletionType
 import com.intellij.openapi.fileEditor.FileDocumentManager
-import com.intellij.openapi.project.ex.ProjectEx
-import com.intellij.openapi.project.ex.ProjectManagerEx
 import com.intellij.openapi.util.text.StringUtil
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.idea.completion.CompletionBindingContextProvider
@@ -45,9 +43,6 @@ abstract class AbstractPerformanceCompletionIncrementalResolveTest : KotlinLight
 
     override fun setUp() {
         super.setUp()
-
-        val prj = myFixture.project
-        if (prj is ProjectEx) prj.setProjectName(stats.name)
 
         if (!warmedUp) {
             doWarmUpPerfTest()

@@ -9,8 +9,6 @@ import org.jetbrains.kotlin.idea.completion.test.handlers.CompletionHandlerTestB
 import com.intellij.application.options.CodeStyle
 import com.intellij.codeInsight.completion.CompletionType
 import com.intellij.openapi.fileEditor.FileDocumentManager
-import com.intellij.openapi.project.ex.ProjectEx
-import com.intellij.openapi.project.ex.ProjectManagerEx
 import com.intellij.openapi.util.io.FileUtil
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.idea.completion.test.ExpectedCompletionUtils
@@ -55,13 +53,6 @@ abstract class AbstractPerformanceCompletionHandlerTests(
         return statsMap.computeIfAbsent(suffix) {
             Stats("completion-$suffix")
         }
-    }
-
-    override fun setUp() {
-        super.setUp()
-
-        val prj = myFixture.project
-        if (prj is ProjectEx) prj.setProjectName(stats().name)
     }
 
     override fun tearDown() {

@@ -22,7 +22,6 @@ import com.intellij.openapi.module.Module
 import com.intellij.openapi.module.ModuleManager
 import com.intellij.openapi.module.ModuleTypeId
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.ex.ProjectEx
 import com.intellij.openapi.project.ex.ProjectManagerEx
 import com.intellij.openapi.projectRoots.JavaSdk
 import com.intellij.openapi.projectRoots.ProjectJdkTable
@@ -198,19 +197,11 @@ abstract class AbstractKotlinProjectsPerformanceTest : UsefulTestCase() {
                 lastProject = project
                 val prj = project!!
 
-                val projectName = stats.name + "#$counter"
-                println("project $project gets name $projectName")
-                if (project is ProjectEx) {
-                    project.setProjectName(projectName)
-                }
-
                 // close all project but last - we're going to return and use it further
                 if (counter < warmUpIterations + iterations - 1) {
                     //LightPlatformTestCase.doTearDown(prj, myApplication)
                     val closeAndDispose = projectManagerEx.closeAndDispose(prj)
                     println("$prj is closed $closeAndDispose")
-                } else {
-                    println("project $project is NOT closed")
                 }
                 counter++
             }

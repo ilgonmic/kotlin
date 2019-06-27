@@ -7,8 +7,6 @@ package org.jetbrains.kotlin.idea.perf
 
 import com.intellij.ide.highlighter.JavaFileType
 import com.intellij.openapi.actionSystem.IdeActions
-import com.intellij.openapi.project.ex.ProjectEx
-import com.intellij.openapi.project.ex.ProjectManagerEx
 import com.intellij.openapi.util.registry.Registry
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.idea.conversion.copy.AbstractJavaToKotlinCopyPasteConversionTest
@@ -39,9 +37,6 @@ abstract class AbstractPerformanceJavaToKotlinCopyPasteConversionTest(private va
 
         Registry.get("kotlin.use.new.j2k").setValue(newJ2K)
         val index = j2kIndex()
-
-        val prj = myFixture.project
-        if (prj is ProjectEx) prj.setProjectName(stats().name)
 
         if (!warmedUp[index]) {
             doWarmUpPerfTest()

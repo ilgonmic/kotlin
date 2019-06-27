@@ -497,14 +497,14 @@ public class KotlinExpressionParsing extends AbstractKotlinParsing {
             // do nothing
         }
         else if (at(LPAR)) {
-            parseValueArgumentList();
+            parseValueArgumentList(false);
             parseCallWithClosure();
         }
         else if (at(LT)) {
             PsiBuilder.Marker typeArgumentList = mark();
             if (myKotlinParsing.tryParseTypeArgumentList(TYPE_ARGUMENT_LIST_STOPPERS)) {
                 typeArgumentList.done(TYPE_ARGUMENT_LIST);
-                if (!myBuilder.newlineBeforeCurrentToken() && at(LPAR)) parseValueArgumentList();
+                if (!myBuilder.newlineBeforeCurrentToken() && at(LPAR)) parseValueArgumentList(false);
                 parseCallWithClosure();
             }
             else {
@@ -1789,7 +1789,7 @@ public class KotlinExpressionParsing extends AbstractKotlinParsing {
      *   : "(" (SimpleName "=")? "*"? element{","} ")"
      *   ;
      */
-    public void parseValueArgumentList() {
+    public void parseValueArgumentList(boolean annotationArguments) {
         PsiBuilder.Marker list = mark();
 
         myBuilder.disableNewlines();
@@ -1823,6 +1823,11 @@ public class KotlinExpressionParsing extends AbstractKotlinParsing {
         }
 
         myBuilder.restoreNewlinesState();
+
+        if (annotationArguments && at(ARROW)) {
+            list.rollbackTo();
+            return;
+        }
 
         list.done(VALUE_ARGUMENT_LIST);
     }

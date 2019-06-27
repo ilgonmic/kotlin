@@ -797,7 +797,8 @@ public class KotlinParsing extends AbstractKotlinParsing {
         parseTypeArgumentList();
 
         if (at(LPAR)) {
-            myExpressionParsing.parseValueArgumentList();
+            IElementType nextElement = lookahead(1);
+            myExpressionParsing.parseValueArgumentList(true);
         }
         annotation.done(ANNOTATION_ENTRY);
 
@@ -1033,7 +1034,7 @@ public class KotlinParsing extends AbstractKotlinParsing {
                 typeReference.done(TYPE_REFERENCE);
                 callee.done(CONSTRUCTOR_CALLEE);
 
-                myExpressionParsing.parseValueArgumentList();
+                myExpressionParsing.parseValueArgumentList(false);
                 delegatorSuperCall.done(SUPER_TYPE_CALL_ENTRY);
                 initializerList.done(INITIALIZER_LIST);
             }
@@ -1188,7 +1189,7 @@ public class KotlinParsing extends AbstractKotlinParsing {
 
             if (at(THIS_KEYWORD) || at(SUPER_KEYWORD)) {
                 parseThisOrSuper();
-                myExpressionParsing.parseValueArgumentList();
+                myExpressionParsing.parseValueArgumentList(false);
             }
             else {
                 error("Expecting a 'this' or 'super' constructor call");
@@ -1197,7 +1198,7 @@ public class KotlinParsing extends AbstractKotlinParsing {
                     beforeWrongDelegationCallee = mark();
                     advance(); // wrong delegation callee
                 }
-                myExpressionParsing.parseValueArgumentList();
+                myExpressionParsing.parseValueArgumentList(false);
 
                 if (beforeWrongDelegationCallee != null) {
                     if (at(LBRACE)) {
@@ -1818,7 +1819,7 @@ public class KotlinParsing extends AbstractKotlinParsing {
         }
         else if (at(LPAR)) {
             reference.done(CONSTRUCTOR_CALLEE);
-            myExpressionParsing.parseValueArgumentList();
+            myExpressionParsing.parseValueArgumentList(false);
             delegator.done(SUPER_TYPE_CALL_ENTRY);
         }
         else {

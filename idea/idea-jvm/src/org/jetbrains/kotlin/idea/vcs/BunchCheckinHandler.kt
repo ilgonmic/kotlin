@@ -29,13 +29,12 @@ import java.io.File
 import javax.swing.JComponent
 import javax.swing.JPanel
 
-private var Project.bunchFileCheckEnabled: Boolean by NotNullableUserDataProperty(Key.create("IS_BUNCH_FILE_CHECK_ENABLED"), true)
+private val BUNCH_PLUGIN_ID = PluginId.getId("org.jetbrains.bunch.tool.idea.plugin")
+
+private var Project.bunchFileCheckEnabled: Boolean
+        by NotNullableUserDataProperty(Key.create("IS_BUNCH_FILE_CHECK_ENABLED"), !PluginManager.isPluginInstalled(BUNCH_PLUGIN_ID))
 
 class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
-    companion object {
-        private val BUNCH_PLUGIN_ID = PluginId.getId("org.jetbrains.bunch.tool.idea.plugin")
-    }
-
     override fun createHandler(panel: CheckinProjectPanel, commitContext: CommitContext): CheckinHandler {
         return BunchCheckInHandler(panel)
     }
@@ -70,6 +69,7 @@ class BunchFileCheckInHandlerFactory : CheckinHandlerFactory() {
             executor: CommitExecutor?,
             additionalDataConsumer: PairConsumer<Any, Any>?
         ): ReturnResult {
+
             if (!project.bunchFileCheckEnabled) return ReturnResult.COMMIT
 
             val extensions = BunchFileUtils.bunchExtension(project)?.toSet() ?: return ReturnResult.COMMIT

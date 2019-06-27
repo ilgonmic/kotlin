@@ -97,20 +97,14 @@ abstract class AbstractKotlinProjectsPerformanceTest : UsefulTestCase() {
     }
 
     override fun tearDown() {
-        super.tearDown()
-
-        if (myProject != null) {
-            val projectManagerEx = ProjectManagerEx.getInstanceEx()
-
-            val closeAndDispose = projectManagerEx.closeAndDispose(myProject!!)
-            if (!closeAndDispose) {
-                println("x".repeat(40))
-                println("x $myProject is ${if (projectManagerEx.isProjectOpened(myProject!!)) "opened" else "closed"}")
-                println("x".repeat(40))
-
-            }
-            myProject = null
-        }
+        RunAll(
+            ThrowableRunnable { super.tearDown() },
+            ThrowableRunnable {
+                if (myProject != null) {
+                    closeProject(myProject!!)
+                    myProject = null
+                }
+            }).run()
     }
 
     private fun getTempDirFixture(): TempDirTestFixture =
@@ -170,7 +164,7 @@ abstract class AbstractKotlinProjectsPerformanceTest : UsefulTestCase() {
         val projectPath = "$path/$name"
 
         val warmUpIterations = 1
-        val iterations = 10
+        val iterations = 3
         val projectManagerEx = ProjectManagerEx.getInstanceEx()
 
         var lastProject: Project? = null
@@ -181,6 +175,9 @@ abstract class AbstractKotlinProjectsPerformanceTest : UsefulTestCase() {
             iterations = iterations,
             testName = "open project${if (note.isNotEmpty()) " $note" else ""}",
             test = {
+
+                println("going to open project $projectPath $counter")
+
                 val project = projectManagerEx.loadAndOpenProject(projectPath)!!
                 if (!Paths.get(projectPath, ".idea").exists()) {
                     initKotlinProject(project, projectPath, name)
@@ -200,14 +197,30 @@ abstract class AbstractKotlinProjectsPerformanceTest : UsefulTestCase() {
                 // close all project but last - we're going to return and use it further
                 if (counter < warmUpIterations + iterations - 1) {
                     //LightPlatformTestCase.doTearDown(prj, myApplication)
-                    val closeAndDispose = projectManagerEx.closeAndDispose(prj)
-                    println("$prj is closed $closeAndDispose")
+                    closeProject(prj)
                 }
                 counter++
             }
         )
 
         return lastProject!!
+    }
+
+    protected fun closeProject(project: Project) {
+        commitAllDocuments()
+//        val modulePath = File("${project.projectFilePath}/../${project.name}${ModuleFileType.DOT_DEFAULT_EXTENSION}")
+//        val ideaPath = File("${project.projectFilePath}/../.idea")
+
+        //UIUtil.dispatchAllInvocationEvents()
+        //doPostponedFormatting(project)
+        val projectManagerEx = ProjectManagerEx.getInstanceEx()
+        val closeAndDispose = projectManagerEx.forceCloseProject(project, true)
+        println("$project is closed $closeAndDispose")
+
+//        if (manuallyInit) {
+//            println("$modulePath ${FileUtil.delete(modulePath)}")
+//            println("$ideaPath ${FileUtil.delete(ideaPath)}")
+//        }
     }
 
     private fun initKotlinProject(
@@ -252,7 +265,7 @@ abstract class AbstractKotlinProjectsPerformanceTest : UsefulTestCase() {
                 highlightFile(file!!)
             },
             tearDown = {
-                highlightInfos = it!!
+                highlightInfos = it ?: emptyList()
             }
         )
         return highlightInfos
@@ -298,6 +311,7 @@ abstract class AbstractKotlinProjectsPerformanceTest : UsefulTestCase() {
                     }
                 } finally {
                     commitAllDocuments()
+                    FileDocumentManager.getInstance().reloadFromDisk(fixture.getDocument(fixture.file))
                     fixture.tearDown()
                 }
             }
@@ -315,6 +329,9 @@ abstract class AbstractKotlinProjectsPerformanceTest : UsefulTestCase() {
     private fun openFileInEditor(project: Project, name: String): EditorFile {
         val psiFile = projectFileByName(project, name)
         val vFile = psiFile.virtualFile
+
+        FileDocumentManager.getInstance().reloadFiles(vFile)
+
         val fileEditorManager = FileEditorManager.getInstance(project)
         fileEditorManager.openFile(vFile, true)
         val document = FileDocumentManager.getInstance().getDocument(vFile)!!

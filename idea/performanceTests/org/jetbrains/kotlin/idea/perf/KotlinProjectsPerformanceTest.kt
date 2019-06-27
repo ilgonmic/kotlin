@@ -5,7 +5,6 @@
 
 package org.jetbrains.kotlin.idea.perf
 
-import com.intellij.openapi.project.ex.ProjectManagerEx
 import org.junit.AfterClass
 import org.junit.BeforeClass
 
@@ -39,15 +38,10 @@ class KotlinProjectsPerformanceTest : AbstractKotlinProjectsPerformanceTest() {
             val project = innerPerfOpenProject("helloKotlin", hwStats, "warm-up")
             val perfHighlightFile = perfHighlightFile(project, "src/HelloMain.kt", hwStats, "warm-up")
             assertTrue("kotlin project has been not imported properly", perfHighlightFile.isNotEmpty())
-            ProjectManagerEx.getInstanceEx().forceCloseProject(project, true)
+            closeProject(project)
 
             warmedUp = true
         }
-    }
-
-    override fun tearDown() {
-        commitAllDocuments()
-        super.tearDown()
     }
 
     fun testHelloWorldProject() {

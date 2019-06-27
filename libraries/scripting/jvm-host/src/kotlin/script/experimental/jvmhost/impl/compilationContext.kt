@@ -27,12 +27,13 @@ import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.scripting.compiler.plugin.ScriptingCompilerConfigurationComponentRegistrar
 import org.jetbrains.kotlin.scripting.configuration.ScriptingConfigurationKeys
 import org.jetbrains.kotlin.scripting.definitions.ScriptDefinition
+import org.jetbrains.kotlin.scripting.definitions.ScriptDependenciesProvider
 import org.jetbrains.kotlin.scripting.dependencies.ScriptsCompilationDependencies
 import org.jetbrains.kotlin.scripting.dependencies.collectScriptsCompilationDependencies
 import kotlin.script.experimental.api.ScriptCompilationConfiguration
-import kotlin.script.experimental.api.SourceCode
 import kotlin.script.experimental.api.compilerOptions
 import kotlin.script.experimental.api.dependencies
+import kotlin.script.experimental.api.valueOrNull
 import kotlin.script.experimental.host.ScriptingHostConfiguration
 import kotlin.script.experimental.jvm.JvmDependency
 import kotlin.script.experimental.jvm.jdkHome
@@ -60,7 +61,7 @@ internal fun createSharedCompilationContext(
 
     val (initialScriptCompilationConfiguration, kotlinCompilerConfiguration) =
         createInitialConfigurations(
-            scriptCompilationConfiguration, hostConfiguration, scriptCompilationState, messageCollector, ignoredOptionsReportingState
+            scriptCompilationConfiguration, hostConfiguration, messageCollector, ignoredOptionsReportingState
         )
     val environment =
         KotlinCoreEnvironment.createForProduction(
@@ -75,7 +76,6 @@ internal fun createSharedCompilationContext(
 internal fun createInitialConfigurations(
     scriptCompilationConfiguration: ScriptCompilationConfiguration,
     hostConfiguration: ScriptingHostConfiguration,
-    scriptCompilationState: BridgeScriptDefinitionDynamicState,
     messageCollector: ScriptDiagnosticsMessageCollector,
     ignoredOptionsReportingState: IgnoredOptionsReportingState
 ): Pair<ScriptCompilationConfiguration, CompilerConfiguration> {
@@ -210,26 +210,25 @@ internal fun collectRefinedSourcesAndUpdateEnvironment(
 
     sourceFiles.addAll(newSources)
 
-    // collectScriptsCompilationDependencies calls resolver for every file, so at this point all updated configurations are collected
-    context.environment.configuration.updateWithRefinedConfigurations(
-        context.baseScriptCompilationConfiguration, context.scriptCompilationState.configurations,
-        messageCollector, context.ignoredOptionsReportingState
-    )
+    // collectScriptsCompilationDependencies calls resolver for every file, so at this point all updated configurations are collected in the ScriptDependenciesProvider
+    context.environment.configuration.updateWithRefinedConfigurations(context, sourceFiles, messageCollector)
     return sourceFiles to sourceDependencies
 }
 
 private fun CompilerConfiguration.updateWithRefinedConfigurations(
-    initialScriptCompilationConfiguration: ScriptCompilationConfiguration,
-    refinedScriptCompilationConfigurations: Map<SourceCode, ScriptCompilationConfiguration>,
-    messageCollector: ScriptDiagnosticsMessageCollector,
-    reportingState: IgnoredOptionsReportingState
+    context: SharedScriptCompilationContext,
+    sourceFiles: List<KtFile>,
+    messageCollector: ScriptDiagnosticsMessageCollector
 ) {
-    val updatedCompilerOptions = refinedScriptCompilationConfigurations.flatMap {
-        it.value[ScriptCompilationConfiguration.compilerOptions] ?: emptyList()
+    val dependenciesProvider = ScriptDependenciesProvider.getInstance(context.environment.project)
+    val updatedCompilerOptions = sourceFiles.flatMap {
+        dependenciesProvider?.getScriptConfigurationResult(it)?.valueOrNull()?.configuration?.get(
+            ScriptCompilationConfiguration.compilerOptions
+        ) ?: emptyList()
     }
     if (updatedCompilerOptions.isNotEmpty() &&
-        updatedCompilerOptions != initialScriptCompilationConfiguration[ScriptCompilationConfiguration.compilerOptions]
+        updatedCompilerOptions != context.baseScriptCompilationConfiguration[ScriptCompilationConfiguration.compilerOptions]
     ) {
-        updateWithCompilerOptions(updatedCompilerOptions, messageCollector, reportingState, true)
+        updateWithCompilerOptions(updatedCompilerOptions, messageCollector, context.ignoredOptionsReportingState, true)
     }
 }

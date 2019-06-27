@@ -140,6 +140,7 @@ class LazyScriptDescriptor(
 
     override fun computeSupertypes() = listOf(baseClassDescriptor()?.defaultType ?: builtIns.anyType)
 
+    // TODO: consider passing ScriptSource to avoid psi file fsearching
     private inner class ImportedScriptDescriptorsFinder {
 
         val fileManager = VirtualFileManager.getInstance()
@@ -153,7 +154,7 @@ class LazyScriptDescriptor(
                 return null
             }
 
-            val vfile = localFS.findFileByPath(importedScriptFile.path)
+            val vfile = localFS.findFileByPath(importedScriptFile.absolutePath)
                 ?: return errorDescriptor(MISSING_IMPORTED_SCRIPT_FILE)
             val psiFile = psiManager.findFile(vfile)
                 ?: return errorDescriptor(MISSING_IMPORTED_SCRIPT_PSI)

@@ -17,6 +17,7 @@ import org.jetbrains.kotlin.codegen.state.GenerationState
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.languageVersionSettings
 import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.scripting.definitions.ScriptDependenciesProvider
 import kotlin.script.experimental.api.*
 import kotlin.script.experimental.host.ScriptingHostConfiguration
 import kotlin.script.experimental.jvmhost.KJvmCompilerProxy
@@ -39,6 +40,7 @@ class KJvmCompilerImpl(val hostConfiguration: ScriptingHostConfiguration) : KJvm
 
             val (sourceFiles, sourceDependencies) = collectRefinedSourcesAndUpdateEnvironment(context, mainKtFile, messageCollector)
 
+            val dependenciesProvider = ScriptDependenciesProvider.getInstance(context.environment.project)
             val analysisResult = analyze(sourceFiles, context.environment)
 
             if (!analysisResult.shouldGenerateCode) return failure(script, messageCollector, "no code to generate")
@@ -48,7 +50,7 @@ class KJvmCompilerImpl(val hostConfiguration: ScriptingHostConfiguration) : KJvm
 
             val compiledScript =
                 makeCompiledScript(generationState, script, sourceFiles.first(), sourceDependencies) { ktFile ->
-                    context.scriptCompilationState.configurations.entries.find { ktFile.name == it.key.name }?.value
+                    dependenciesProvider?.getScriptConfigurationResult(ktFile)?.valueOrNull()?.configuration
                         ?: context.baseScriptCompilationConfiguration
                 }
 

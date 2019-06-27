@@ -10,9 +10,10 @@ import java.util.concurrent.locks.ReentrantReadWriteLock
 import javax.script.Bindings
 import javax.script.ScriptContext
 import javax.script.ScriptEngineFactory
-import kotlin.script.experimental.api.ScriptCompilationConfiguration
-import kotlin.script.experimental.api.ScriptEvaluationConfiguration
+import kotlin.script.experimental.api.*
+import kotlin.script.experimental.host.ScriptingHostConfiguration
 import kotlin.script.experimental.jvm.baseClassLoader
+import kotlin.script.experimental.jvm.defaultJvmScriptingHostConfiguration
 import kotlin.script.experimental.jvm.jvm
 import kotlin.script.experimental.jvmhost.repl.JvmReplCompiler
 import kotlin.script.experimental.jvmhost.repl.JvmReplEvaluator
@@ -23,8 +24,20 @@ import kotlin.script.experimental.jvmhost.repl.JvmReplEvaluatorState
 class KotlinJsr223ScriptEngineImpl(
     factory: ScriptEngineFactory,
     val compilationConfiguration: ScriptCompilationConfiguration,
-    val evaluationConfiguration: ScriptEvaluationConfiguration
+    baseEvaluationConfiguration: ScriptEvaluationConfiguration
 ) : KotlinJsr223JvmScriptEngineBase(factory), KotlinJsr223InvocableScriptEngine {
+
+    val jsr223HostConfiguration = ScriptingHostConfiguration(defaultJvmScriptingHostConfiguration) {
+        jsr223 {
+            getScriptContext { getContext() }
+        }
+    }
+
+    val evaluationConfiguration by lazy {
+        ScriptEvaluationConfiguration(baseEvaluationConfiguration) {
+            hostConfiguration(jsr223HostConfiguration)
+        }
+    }
 
     override val replCompiler: ReplCompiler by lazy {
         JvmReplCompiler(compilationConfiguration)

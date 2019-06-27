@@ -3,7 +3,7 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package kotlin.script.experimental.jsr223
+package kotlin.script.experimental.jvmhost.jsr223
 
 import javax.script.ScriptContext
 import kotlin.script.experimental.api.*
@@ -13,7 +13,8 @@ import kotlin.script.experimental.util.PropertiesCollection
 
 interface Jsr223HostConfigurationKeys
 
-open class Jsr223HostConfigurationBuilder : PropertiesCollection.Builder(), Jsr223HostConfigurationKeys {
+open class Jsr223HostConfigurationBuilder : PropertiesCollection.Builder(),
+    Jsr223HostConfigurationKeys {
     companion object : Jsr223HostConfigurationBuilder()
 }
 
@@ -24,7 +25,8 @@ val Jsr223HostConfigurationKeys.getScriptContext by PropertiesCollection.key<() 
 
 interface Jsr223CompilationConfigurationKeys
 
-open class Jsr223CompilationConfigurationBuilder : PropertiesCollection.Builder(), Jsr223CompilationConfigurationKeys {
+open class Jsr223CompilationConfigurationBuilder : PropertiesCollection.Builder(),
+    Jsr223CompilationConfigurationKeys {
     companion object : Jsr223CompilationConfigurationBuilder()
 }
 
@@ -38,7 +40,8 @@ val Jsr223CompilationConfigurationKeys.importAllBindings by PropertiesCollection
 
 interface Jsr223EvaluationConfigurationKeys
 
-open class Jsr223EvaluationConfigurationBuilder : PropertiesCollection.Builder(), Jsr223EvaluationConfigurationKeys {
+open class Jsr223EvaluationConfigurationBuilder : PropertiesCollection.Builder(),
+    Jsr223EvaluationConfigurationKeys {
     companion object : Jsr223EvaluationConfigurationBuilder()
 }
 

@@ -39,9 +39,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.PsiDocumentManagerBase
 import com.intellij.testFramework.*
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture
-import com.intellij.testFramework.LightPlatformTestCase
 import com.intellij.testFramework.PsiTestUtil
-import com.intellij.testFramework.RunAll
 import com.intellij.testFramework.UsefulTestCase
 import com.intellij.testFramework.fixtures.IdeaTestFixtureFactory
 import com.intellij.testFramework.fixtures.TempDirTestFixture
@@ -60,19 +58,11 @@ import java.nio.file.Paths
 fun commitAllDocuments() {
     ProjectManagerEx.getInstanceEx().openProjects.forEach { project ->
         val psiDocumentManagerBase = PsiDocumentManager.getInstance(project) as PsiDocumentManagerBase
-        val uncommittedDocuments = psiDocumentManagerBase.uncommittedDocuments
-
-        println(
-            "project: ${project.name}" +
-                    " uncommittedDocuments: ${uncommittedDocuments.map { it.toString() }.toList()}"
-        )
 
         EdtTestUtil.runInEdtAndWait(ThrowableRunnable {
             psiDocumentManagerBase.clearUncommittedDocuments()
             psiDocumentManagerBase.commitAllDocuments()
         })
-
-
     }
 }
 
@@ -108,20 +98,18 @@ abstract class AbstractKotlinProjectsPerformanceTest : UsefulTestCase() {
     }
 
     override fun tearDown() {
-        var runAll = RunAll()
-
-        runAll.append(ThrowableRunnable { super.tearDown() })
-            .run()
+        super.tearDown()
 
         if (myProject != null) {
             val projectManagerEx = ProjectManagerEx.getInstanceEx()
 
             val closeAndDispose = projectManagerEx.closeAndDispose(myProject!!)
-            println("$myProject is closed $closeAndDispose")
+            if (!closeAndDispose) {
+                println("x".repeat(40))
+                println("x $myProject is ${if (projectManagerEx.isProjectOpened(myProject!!)) "opened" else "closed"}")
+                println("x".repeat(40))
 
-            println("x".repeat(40))
-            println("x $myProject is ${if (projectManagerEx.isProjectOpened(myProject!!)) "opened" else "closed"}")
-            println("x".repeat(40))
+            }
             myProject = null
         }
     }
@@ -228,8 +216,7 @@ abstract class AbstractKotlinProjectsPerformanceTest : UsefulTestCase() {
             }
         )
 
-        val project = lastProject!!
-        return project
+        return lastProject!!
     }
 
     private fun initKotlinProject(

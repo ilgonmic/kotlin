@@ -13,6 +13,7 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
+import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.Mode.DEVELOPMENT
 import org.jetbrains.kotlin.gradle.tasks.createOrRegisterTask
 
 class KotlinBrowserJs(target: KotlinJsTarget) :
@@ -62,7 +63,7 @@ class KotlinBrowserJs(target: KotlinJsTarget) :
                 compileKotlinTask,
                 target.project.tasks.getByName(compilation.processResourcesTaskName)
             )
-
+            it.mode = DEVELOPMENT
             it.bin = "webpack-dev-server/bin/webpack-dev-server.js"
             it.compilation = compilation
             it.description = "start webpack dev server"

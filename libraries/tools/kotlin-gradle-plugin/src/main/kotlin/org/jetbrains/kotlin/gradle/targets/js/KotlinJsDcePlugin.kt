@@ -3,7 +3,9 @@
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-@file:Suppress("PackageDirectoryMismatch") // Old package for compatibility
+@file:Suppress("PackageDirectoryMismatch")
+
+// Old package for compatibility
 package org.jetbrains.kotlin.gradle.plugin
 
 import org.gradle.api.Plugin
@@ -46,12 +48,7 @@ class KotlinJsDcePlugin : Plugin<Project> {
     private fun processCompilation(project: Project, kotlinCompilation: KotlinCompilation<*>) {
         val kotlinTaskName = kotlinCompilation.compileKotlinTaskName
         val kotlinTask = project.tasks.findByName(kotlinTaskName) as? Kotlin2JsCompile ?: return
-        val dceTaskName = lowerCamelCaseName(
-            DCE_TASK_PREFIX,
-            kotlinCompilation.target.disambiguationClassifier,
-            kotlinCompilation.name.takeIf { it != KotlinCompilation.MAIN_COMPILATION_NAME },
-            if (kotlinCompilation.target is KotlinWithJavaTarget<*>) TASK_SUFFIX else MPP_TASK_SUFFIX
-        )
+        val dceTaskName = getKotlinJsDceTaskName(kotlinCompilation)
         val dceTask = project.tasks.create(dceTaskName, KotlinJsDce::class.java).also {
             it.dependsOn(kotlinTask)
             project.tasks.findByName("build")!!.dependsOn(it)
@@ -77,5 +74,19 @@ class KotlinJsDcePlugin : Plugin<Project> {
         private const val MPP_TASK_SUFFIX = "kotlin"
         private const val DCE_TASK_PREFIX = "runDce"
         private const val DEFAULT_OUT_DIR = "kotlin-js-min"
+
+        fun apply(project: Project, compilation: KotlinCompilation<*>): KotlinJsDce {
+            project.plugins.apply(KotlinJsDcePlugin::class.java)
+            return project.tasks.getByName(getKotlinJsDceTaskName(compilation)) as KotlinJsDce
+        }
+
+        fun getKotlinJsDceTaskName(compilation: KotlinCompilation<*>): String {
+            return lowerCamelCaseName(
+                DCE_TASK_PREFIX,
+                compilation.target.disambiguationClassifier,
+                compilation.name.takeIf { it != KotlinCompilation.MAIN_COMPILATION_NAME },
+                if (compilation.target is KotlinWithJavaTarget<*>) TASK_SUFFIX else MPP_TASK_SUFFIX
+            )
+        }
     }
 }

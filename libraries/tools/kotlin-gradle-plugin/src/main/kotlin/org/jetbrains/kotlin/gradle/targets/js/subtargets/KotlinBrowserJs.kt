@@ -6,6 +6,7 @@
 package org.jetbrains.kotlin.gradle.targets.js.subtargets
 
 import org.gradle.language.base.plugins.LifecycleBasePlugin
+import org.jetbrains.kotlin.gradle.plugin.KotlinJsDcePlugin
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJsCompilation
 import org.jetbrains.kotlin.gradle.targets.js.KotlinJsTarget
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsBrowserDsl
@@ -15,6 +16,7 @@ import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.Mode.DEVELOPMENT
 import org.jetbrains.kotlin.gradle.tasks.createOrRegisterTask
+import java.io.File
 
 class KotlinBrowserJs(target: KotlinJsTarget) :
     KotlinJsSubTarget(target, "browser"),
@@ -43,15 +45,19 @@ class KotlinBrowserJs(target: KotlinJsTarget) :
         val project = compilation.target.project
         val nodeJs = NodeJsRootPlugin.apply(project.rootProject)
 
+        val kotlinJsDce = KotlinJsDcePlugin.apply(project, compilation)
+
         project.createOrRegisterTask<KotlinWebpack>(disambiguateCamelCased("webpack")) {
-            val compileKotlinTask = compilation.compileKotlinTask
             it.dependsOn(
                 nodeJs.npmInstallTask,
-                compileKotlinTask
+                kotlinJsDce
             )
 
             it.compilation = compilation
             it.description = "build webpack bundle"
+            it.entry = kotlinJsDce.destinationDir.path
+                .let(::File)
+                .resolve(compilation.compileKotlinTask.outputFile.name)
 
             project.tasks.getByName(LifecycleBasePlugin.ASSEMBLE_TASK_NAME).dependsOn(it)
         }

@@ -77,6 +77,11 @@ data class KotlinWebpackConfig(
         val contentBase: List<String>
     ) : Serializable
 
+    enum class Devtool(val code: String) {
+        EVAL_SOURCE_MAP("eval-source-map"),
+        SOURCE_MAP("source-map")
+    }
+
     fun save(configFile: File) {
         configFile.writer().use {
             appendTo(it)
@@ -197,6 +202,8 @@ data class KotlinWebpackConfig(
     private fun Appendable.appendSourceMaps() {
         if (!sourceMaps) return
 
+        val devtool = if (mode == Mode.PRODUCTION) Devtool.SOURCE_MAP else Devtool.EVAL_SOURCE_MAP
+
         //language=JavaScript 1.8
         appendln(
             """
@@ -206,7 +213,7 @@ data class KotlinWebpackConfig(
                         use: ["source-map-loader"],
                         enforce: "pre"
                 });
-                config.devtool = 'eval-source-map';
+                config.devtool = '${devtool.code}';
                 
             """.trimIndent()
         )

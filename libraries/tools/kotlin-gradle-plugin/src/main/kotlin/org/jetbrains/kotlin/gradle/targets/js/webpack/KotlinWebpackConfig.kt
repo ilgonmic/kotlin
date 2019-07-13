@@ -110,6 +110,7 @@ data class KotlinWebpackConfig(
             )
 
             appendEntry()
+            appendResolveModules()
             appendSourceMaps()
             appendSourceMapsRuntime()
             appendDevServer()
@@ -232,6 +233,19 @@ data class KotlinWebpackConfig(
                     path: ${jsQuotedString(outputPath.canonicalPath)},
                     filename: ${jsQuotedString(outputFileName!!)}
                 };
+                
+            """.trimIndent()
+        )
+    }
+
+    private fun Appendable.appendResolveModules() {
+        if (entry == null) return
+
+        //language=JavaScript 1.8
+        appendln(
+            """
+                // resolve modules
+                config.resolve.modules.unshift(${jsQuotedString(entry.parent)})
                 
             """.trimIndent()
         )

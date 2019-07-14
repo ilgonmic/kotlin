@@ -85,15 +85,15 @@ class KotlinBrowserJs(target: KotlinJsTarget) :
 
         target.runTask.dependsOn(run.getTaskOrProvider())
 
-        sequenceOf(webpack, run)
-            .forEach { taskHolder ->
-                project.afterEvaluate {
+        project.afterEvaluate {
+            sequenceOf(webpack, run)
+                .forEach { taskHolder ->
                     taskHolder.activateDce(
                         compileKotlinTask = compileKotlinTask,
                         dceTask = kotlinJsDce
                     )
                 }
-            }
+        }
     }
 
     private fun TaskHolder<KotlinWebpack>.activateDce(

@@ -16,7 +16,6 @@ import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.Mode.DEVELOPMENT
 import org.jetbrains.kotlin.gradle.tasks.createOrRegisterTask
-import java.io.File
 
 class KotlinBrowserJs(target: KotlinJsTarget) :
     KotlinJsSubTarget(target, "browser"),
@@ -54,24 +53,23 @@ class KotlinBrowserJs(target: KotlinJsTarget) :
             )
 
             it.compilation = compilation
+            it.dceTask = kotlinJsDce
             it.description = "build webpack bundle"
-            it.entry = kotlinJsDce.destinationDir.path
-                .let(::File)
-                .resolve(compilation.compileKotlinTask.outputFile.name)
 
             project.tasks.getByName(LifecycleBasePlugin.ASSEMBLE_TASK_NAME).dependsOn(it)
         }
 
         val run = project.createOrRegisterTask<KotlinWebpack>(disambiguateCamelCased("run")) {
-            val compileKotlinTask = compilation.compileKotlinTask
             it.dependsOn(
                 nodeJs.npmInstallTask,
-                compileKotlinTask,
+                kotlinJsDce,
                 target.project.tasks.getByName(compilation.processResourcesTaskName)
             )
-            it.mode = DEVELOPMENT
-            it.bin = "webpack-dev-server/bin/webpack-dev-server.js"
             it.compilation = compilation
+            it.dceTask = kotlinJsDce
+            it.mode = DEVELOPMENT
+            it.dceEnabled = false
+            it.bin = "webpack-dev-server/bin/webpack-dev-server.js"
             it.description = "start webpack dev server"
 
             it.devServer = KotlinWebpackConfig.DevServer(

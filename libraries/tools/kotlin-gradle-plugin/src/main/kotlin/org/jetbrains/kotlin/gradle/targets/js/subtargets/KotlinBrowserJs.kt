@@ -7,6 +7,7 @@ package org.jetbrains.kotlin.gradle.targets.js.subtargets
 
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.jetbrains.kotlin.gradle.plugin.KotlinJsDcePlugin
+import org.jetbrains.kotlin.gradle.plugin.TaskHolder
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJsCompilation
 import org.jetbrains.kotlin.gradle.targets.js.KotlinJsTarget
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsBrowserDsl
@@ -15,7 +16,10 @@ import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.Mode.DEVELOPMENT
+import org.jetbrains.kotlin.gradle.tasks.Kotlin2JsCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinJsDce
 import org.jetbrains.kotlin.gradle.tasks.createOrRegisterTask
+import java.io.File
 
 class KotlinBrowserJs(target: KotlinJsTarget) :
     KotlinJsSubTarget(target, "browser"),
@@ -44,16 +48,16 @@ class KotlinBrowserJs(target: KotlinJsTarget) :
         val project = compilation.target.project
         val nodeJs = NodeJsRootPlugin.apply(project.rootProject)
 
+        val compileKotlinTask = compilation.compileKotlinTask
         val kotlinJsDce = KotlinJsDcePlugin.apply(project, compilation)
 
-        project.createOrRegisterTask<KotlinWebpack>(disambiguateCamelCased("webpack")) {
+        val webpack = project.createOrRegisterTask<KotlinWebpack>(disambiguateCamelCased("webpack")) {
             it.dependsOn(
                 nodeJs.npmInstallTask,
-                kotlinJsDce
+                compileKotlinTask
             )
 
             it.compilation = compilation
-            it.dceTask = kotlinJsDce
             it.description = "build webpack bundle"
 
             project.tasks.getByName(LifecycleBasePlugin.ASSEMBLE_TASK_NAME).dependsOn(it)
@@ -62,11 +66,10 @@ class KotlinBrowserJs(target: KotlinJsTarget) :
         val run = project.createOrRegisterTask<KotlinWebpack>(disambiguateCamelCased("run")) {
             it.dependsOn(
                 nodeJs.npmInstallTask,
-                kotlinJsDce,
+                compileKotlinTask,
                 target.project.tasks.getByName(compilation.processResourcesTaskName)
             )
             it.compilation = compilation
-            it.dceTask = kotlinJsDce
             it.mode = DEVELOPMENT
             it.dceEnabled = false
             it.bin = "webpack-dev-server/bin/webpack-dev-server.js"
@@ -81,5 +84,30 @@ class KotlinBrowserJs(target: KotlinJsTarget) :
         }
 
         target.runTask.dependsOn(run.getTaskOrProvider())
+
+        sequenceOf(webpack, run)
+            .forEach { taskHolder ->
+                project.afterEvaluate {
+                    taskHolder.activateDce(
+                        compileKotlinTask = compileKotlinTask,
+                        dceTask = kotlinJsDce
+                    )
+                }
+            }
+    }
+
+    private fun TaskHolder<KotlinWebpack>.activateDce(
+        compileKotlinTask: Kotlin2JsCompile,
+        dceTask: KotlinJsDce
+    ) {
+        configure {
+            if (it.dceEnabled) {
+                it.entry = dceTask.destinationDir.path
+                    .let(::File)
+                    .resolve(compileKotlinTask.outputFile.name)
+
+                it.dependsOn(dceTask)
+            }
+        }
     }
 }

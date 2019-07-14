@@ -21,7 +21,6 @@ import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.npm.RequiresNpmDependencies
 import org.jetbrains.kotlin.gradle.targets.js.npm.npmProject
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig.Mode
-import org.jetbrains.kotlin.gradle.tasks.KotlinJsDce
 import org.jetbrains.kotlin.gradle.testing.internal.reportsDir
 import org.jetbrains.kotlin.gradle.utils.injected
 import java.io.File
@@ -49,23 +48,16 @@ open class KotlinWebpack : DefaultTask(), RequiresNpmDependencies {
             target.project.path + "@" + target.name + ":" + it.compilationName
         }
 
-    internal lateinit var dceTask: KotlinJsDce
-
-    var dceEnabled: Boolean
-        get() = !dceTask.dceOptions.devMode
-        set(value) {
-            dceTask.dceOptions.devMode = !value
-        }
+    @Input
+    var dceEnabled: Boolean = true
 
     @Input
     var mode: Mode = Mode.PRODUCTION
 
     @get:PathSensitive(PathSensitivity.ABSOLUTE)
     @get:InputFile
-    val entry: File
-        get() = dceTask.destinationDir.path
-            .let(::File)
-            .resolve(compilation.compileKotlinTask.outputFile.name)
+    var entry: File? = null
+        get() = field ?: compilation.compileKotlinTask.outputFile
 
     @Suppress("unused")
     val runtimeClasspath: FileCollection
@@ -104,7 +96,7 @@ open class KotlinWebpack : DefaultTask(), RequiresNpmDependencies {
     var report: Boolean = false
 
     open val reportDir: File
-        @OutputDirectory get() = project.reportsDir.resolve("webpack").resolve(entry.nameWithoutExtension)
+        @OutputDirectory get() = project.reportsDir.resolve("webpack").resolve(entry!!.nameWithoutExtension)
 
     open val evaluatedConfigFile: File
         @OutputFile get() = reportDir.resolve("webpack.config.evaluated.js")

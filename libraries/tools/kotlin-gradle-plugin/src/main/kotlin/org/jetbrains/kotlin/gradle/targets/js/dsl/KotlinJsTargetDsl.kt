@@ -52,6 +52,8 @@ interface KotlinJsBrowserDsl : KotlinJsSubTargetDsl {
             ConfigureUtil.configure(fn, this)
         }
     }
+
+    val dceKeep: MutableList<String>
 }
 
 interface KotlinJsNodeDsl : KotlinJsSubTargetDsl {

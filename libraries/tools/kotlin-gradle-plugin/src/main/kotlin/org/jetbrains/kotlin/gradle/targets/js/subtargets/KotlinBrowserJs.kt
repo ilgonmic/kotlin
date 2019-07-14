@@ -30,6 +30,8 @@ class KotlinBrowserJs(target: KotlinJsTarget) :
 
     private val webpackTaskName = disambiguateCamelCased("webpack")
 
+    override val dceKeep: MutableList<String> = mutableListOf()
+
     override fun configureDefaultTestFramework(it: KotlinJsTest) {
         it.useKarma {
             useChromeHeadless()
@@ -86,6 +88,8 @@ class KotlinBrowserJs(target: KotlinJsTarget) :
         target.runTask.dependsOn(run.getTaskOrProvider())
 
         project.afterEvaluate {
+            kotlinJsDce.keep.addAll(dceKeep)
+
             sequenceOf(webpack, run)
                 .forEach { taskHolder ->
                     taskHolder.activateDce(

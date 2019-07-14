@@ -239,7 +239,7 @@ data class KotlinWebpackConfig(
     }
 
     private fun Appendable.appendResolveModules() {
-        if (entry == null) return
+        if (entry == null || entry.parent == null) return
 
         //language=JavaScript 1.8
         appendln(

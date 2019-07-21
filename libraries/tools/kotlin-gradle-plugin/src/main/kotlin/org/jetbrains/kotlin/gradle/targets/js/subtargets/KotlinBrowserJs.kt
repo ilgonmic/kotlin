@@ -134,6 +134,7 @@ class KotlinBrowserJs(target: KotlinJsTarget) :
                     .let(::File)
                     .resolve(compileKotlinTask.outputFile.name)
 
+                it.dependsOn.remove(compileKotlinTask)
                 it.dependsOn(dceTask)
             }
         }

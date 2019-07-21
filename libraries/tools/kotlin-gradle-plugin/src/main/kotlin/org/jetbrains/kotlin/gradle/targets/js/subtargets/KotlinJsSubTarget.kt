@@ -14,7 +14,6 @@ import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsSubTargetDsl
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
 import org.jetbrains.kotlin.gradle.targets.js.npm.NpmResolverPlugin
 import org.jetbrains.kotlin.gradle.targets.js.npm.npmProject
-import org.jetbrains.kotlin.gradle.targets.js.npm.tasks.KotlinPackageJsonTask
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.tasks.createOrRegisterTask
 import org.jetbrains.kotlin.gradle.testing.internal.configureConventions
@@ -47,11 +46,10 @@ abstract class KotlinJsSubTarget(
         lowerCamelCaseName(target.disambiguationClassifier, disambiguationClassifier, name)
 
     private fun configureTests() {
-        target.compilations.all { compilation ->
-            if (compilation.name == KotlinCompilation.TEST_COMPILATION_NAME) {
-                configureTests(compilation)
-            }
-        }
+        configureAction(
+            action = ::configureTests,
+            compilationPredicate = TEST_COMPILATION_PREDICATE
+        )
     }
 
     abstract val testTaskDescription: String
@@ -90,17 +88,32 @@ abstract class KotlinJsSubTarget(
 
     protected abstract fun configureDefaultTestFramework(it: KotlinJsTest)
 
-    fun configureRun() {
-        target.compilations.all { compilation ->
-            if (compilation.name == KotlinCompilation.MAIN_COMPILATION_NAME) {
-                configureRun(compilation)
-            }
-        }
+    private fun configureRun() {
+        configureAction(
+            action = ::configureRun,
+            compilationPredicate = MAIN_COMPILATION_PREDICATE
+        )
     }
 
     protected abstract fun configureRun(compilation: KotlinJsCompilation)
 
+    private fun configureAction(
+        action: (compilation: KotlinJsCompilation) -> Unit,
+        compilationPredicate: (compilation: KotlinJsCompilation) -> Boolean
+    ) {
+        target.compilations.all { compilation ->
+            if (compilationPredicate(compilation)) {
+                action(compilation)
+            }
+        }
+    }
+
     override fun testTask(body: KotlinJsTest.() -> Unit) {
         (project.tasks.getByName(testTaskName) as KotlinJsTest).body()
+    }
+
+    companion object {
+        private val MAIN_COMPILATION_PREDICATE: (KotlinJsCompilation) -> Boolean = { it.name == KotlinCompilation.MAIN_COMPILATION_NAME }
+        private val TEST_COMPILATION_PREDICATE: (KotlinJsCompilation) -> Boolean = { it.name == KotlinCompilation.TEST_COMPILATION_NAME }
     }
 }

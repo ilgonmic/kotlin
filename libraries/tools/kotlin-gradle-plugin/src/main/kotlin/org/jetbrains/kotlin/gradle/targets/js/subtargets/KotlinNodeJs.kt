@@ -14,7 +14,6 @@ import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 class KotlinNodeJs(target: KotlinJsTarget) :
     KotlinJsSubTarget(target, "node"),
     KotlinJsNodeDsl {
-
     override val testTaskDescription: String
         get() = "Run all ${target.name} tests inside nodejs using the builtin test framework"
 
@@ -30,4 +29,6 @@ class KotlinNodeJs(target: KotlinJsTarget) :
         val runTaskHolder = NodeJsExec.create(compilation, disambiguateCamelCased("run"))
         target.runTask.dependsOn(runTaskHolder.getTaskOrProvider())
     }
+
+    override fun configureDistribution(compilation: KotlinJsCompilation) {}
 }

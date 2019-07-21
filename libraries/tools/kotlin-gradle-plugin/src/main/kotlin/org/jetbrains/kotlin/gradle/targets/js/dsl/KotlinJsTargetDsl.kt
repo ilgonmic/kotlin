@@ -10,6 +10,7 @@ import org.gradle.util.ConfigureUtil
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsExec
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
+import org.jetbrains.kotlin.gradle.tasks.KotlinJsDce
 
 interface KotlinJsTargetDsl {
     fun browser() = browser { }
@@ -53,7 +54,19 @@ interface KotlinJsBrowserDsl : KotlinJsSubTargetDsl {
         }
     }
 
-    val dceKeep: MutableList<String>
+    fun runDceTask(body: KotlinJsDce.() -> Unit)
+    fun runDceTask(fn: Closure<*>) {
+        runDceTask {
+            ConfigureUtil.configure(fn, this)
+        }
+    }
+
+    fun webpackDceTask(body: KotlinJsDce.() -> Unit)
+    fun webpackDceTask(fn: Closure<*>) {
+        webpackDceTask {
+            ConfigureUtil.configure(fn, this)
+        }
+    }
 }
 
 interface KotlinJsNodeDsl : KotlinJsSubTargetDsl {

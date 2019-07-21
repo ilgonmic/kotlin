@@ -31,7 +31,8 @@ class KotlinBrowserJs(target: KotlinJsTarget) :
 
     private val webpackTaskName = disambiguateCamelCased("webpack")
 
-    override val dceKeep: MutableList<String> = mutableListOf()
+    private val runDceTaskName = disambiguateCamelCased("runDce")
+    private val webpackDceTaskName = disambiguateCamelCased("webpackDce")
 
     override fun configureDefaultTestFramework(it: KotlinJsTest) {
         it.useKarma {
@@ -47,26 +48,24 @@ class KotlinBrowserJs(target: KotlinJsTarget) :
         (project.tasks.getByName(webpackTaskName) as KotlinWebpack).body()
     }
 
+    override fun runDceTask(body: KotlinJsDce.() -> Unit) {
+        (project.tasks.getByName(runDceTaskName) as KotlinJsDce).body()
+    }
+
+    override fun webpackDceTask(body: KotlinJsDce.() -> Unit) {
+        (project.tasks.getByName(webpackDceTaskName) as KotlinJsDce).body()
+    }
+
     override fun configureRun(compilation: KotlinJsCompilation) {
         val project = compilation.target.project
         val nodeJs = NodeJsRootPlugin.apply(project.rootProject)
 
+        val distributionName = "run"
+
         val compileKotlinTask = compilation.compileKotlinTask
-        val kotlinJsDce = applyDce(project, compilation)
+        val kotlinJsDce = applyDce(project, compilation, distributionName)
 
-        val webpack = project.createOrRegisterTask<KotlinWebpack>(disambiguateCamelCased("webpack")) {
-            it.dependsOn(
-                nodeJs.npmInstallTask,
-                compileKotlinTask
-            )
-
-            it.compilation = compilation
-            it.description = "build webpack bundle"
-
-            project.tasks.getByName(LifecycleBasePlugin.ASSEMBLE_TASK_NAME).dependsOn(it)
-        }
-
-        val run = project.createOrRegisterTask<KotlinWebpack>(disambiguateCamelCased("run")) {
+        val run = project.createOrRegisterTask<KotlinWebpack>(disambiguateCamelCased(distributionName)) {
             it.dependsOn(
                 nodeJs.npmInstallTask,
                 compileKotlinTask,
@@ -89,21 +88,49 @@ class KotlinBrowserJs(target: KotlinJsTarget) :
         target.runTask.dependsOn(run.getTaskOrProvider())
 
         project.afterEvaluate {
-            kotlinJsDce.keep.addAll(dceKeep)
-
-            sequenceOf(webpack, run)
-                .forEach { taskHolder ->
-                    taskHolder.activateDce(
-                        compileKotlinTask = compileKotlinTask,
-                        dceTask = kotlinJsDce
-                    )
-                }
+            run.activateDce(
+                compileKotlinTask = compileKotlinTask,
+                dceTask = kotlinJsDce
+            )
         }
     }
 
-    private fun applyDce(project: Project, kotlinCompilation: KotlinJsCompilation): KotlinJsDce {
+    override fun configureDistribution(compilation: KotlinJsCompilation) {
+        val project = compilation.target.project
+        val nodeJs = NodeJsRootPlugin.apply(project.rootProject)
+
+        val distributionName = "webpack"
+
+        val compileKotlinTask = compilation.compileKotlinTask
+        val kotlinJsDce = applyDce(project, compilation, distributionName)
+
+        val webpack = project.createOrRegisterTask<KotlinWebpack>(disambiguateCamelCased(distributionName)) {
+            it.dependsOn(
+                nodeJs.npmInstallTask,
+                compileKotlinTask
+            )
+
+            it.compilation = compilation
+            it.description = "build webpack bundle"
+
+            project.tasks.getByName(LifecycleBasePlugin.ASSEMBLE_TASK_NAME).dependsOn(it)
+        }
+
+        project.afterEvaluate {
+            webpack.activateDce(
+                compileKotlinTask = compileKotlinTask,
+                dceTask = kotlinJsDce
+            )
+        }
+    }
+
+    private fun applyDce(
+        project: Project,
+        kotlinCompilation: KotlinJsCompilation,
+        name: String
+    ): KotlinJsDce {
         val kotlinTask = kotlinCompilation.compileKotlinTask
-        val dceTask = project.createOrRegisterTask<KotlinJsDce>(disambiguateCamelCased("dce")) {
+        val dceTask = project.createOrRegisterTask<KotlinJsDce>(disambiguateCamelCased(name + "Dce")) {
             it.dependsOn(kotlinTask)
             project.tasks.findByName("build")!!.dependsOn(it)
         }.doGetTask()

@@ -35,6 +35,7 @@ abstract class KotlinJsSubTarget(
 
         configureTests()
         configureRun()
+        configureDistribution()
 
         target.compilations.all {
             val npmProject = it.npmProject
@@ -96,6 +97,15 @@ abstract class KotlinJsSubTarget(
     }
 
     protected abstract fun configureRun(compilation: KotlinJsCompilation)
+
+    private fun configureDistribution() {
+        configureAction(
+            action = ::configureDistribution,
+            compilationPredicate = MAIN_COMPILATION_PREDICATE
+        )
+    }
+
+    protected abstract fun configureDistribution(compilation: KotlinJsCompilation)
 
     private fun configureAction(
         action: (compilation: KotlinJsCompilation) -> Unit,

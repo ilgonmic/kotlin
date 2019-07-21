@@ -19,17 +19,14 @@ package org.jetbrains.kotlin.gradle.tasks
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
-import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 import org.jetbrains.kotlin.cli.common.arguments.K2JSDceArguments
 import org.jetbrains.kotlin.cli.js.dce.K2JSDce
-import org.jetbrains.kotlin.gradle.logging.GradleKotlinLogger
 import org.jetbrains.kotlin.compilerRunner.runToolInSeparateProcess
 import org.jetbrains.kotlin.gradle.dsl.KotlinJsDce
 import org.jetbrains.kotlin.gradle.dsl.KotlinJsDceOptions
 import org.jetbrains.kotlin.gradle.dsl.KotlinJsDceOptionsImpl
+import org.jetbrains.kotlin.gradle.logging.GradleKotlinLogger
 import java.io.File
 
 @CacheableTask
@@ -65,13 +62,17 @@ import java.io.File
         keep += fqn
     }
 
+    @get:OutputDirectory
+    val outputDirectory: File
+        get() = dceOptions.outputDirectory?.let(::File) ?: destinationDir
+
     @TaskAction
     fun performDce() {
-        val inputFiles = (listOf(getSource()) + classpath.map { project.fileTree(it) })
+        val inputFiles = (listOf(source) + classpath.map { project.fileTree(it) })
             .reduce(FileTree::plus)
             .files.map { it.path }
 
-        val outputDirArgs = arrayOf("-output-dir", destinationDir.path)
+        val outputDirArgs = arrayOf("-output-dir", outputDirectory.path)
 
         val argsArray = serializedCompilerArguments.toTypedArray()
 
@@ -82,5 +83,9 @@ import java.io.File
             log
         )
         throwGradleExceptionIfError(exitCode)
+    }
+
+    companion object {
+        const val DEFAULT_OUT_DIR = "dce"
     }
 }

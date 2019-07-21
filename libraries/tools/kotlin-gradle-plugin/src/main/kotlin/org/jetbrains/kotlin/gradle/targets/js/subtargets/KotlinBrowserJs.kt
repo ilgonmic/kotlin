@@ -5,13 +5,14 @@
 
 package org.jetbrains.kotlin.gradle.targets.js.subtargets
 
+import org.gradle.api.Project
 import org.gradle.language.base.plugins.LifecycleBasePlugin
-import org.jetbrains.kotlin.gradle.plugin.KotlinJsDcePlugin
 import org.jetbrains.kotlin.gradle.plugin.TaskHolder
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinJsCompilation
 import org.jetbrains.kotlin.gradle.targets.js.KotlinJsTarget
 import org.jetbrains.kotlin.gradle.targets.js.dsl.KotlinJsBrowserDsl
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin
+import org.jetbrains.kotlin.gradle.targets.js.npm.npmProject
 import org.jetbrains.kotlin.gradle.targets.js.testing.KotlinJsTest
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
@@ -51,7 +52,7 @@ class KotlinBrowserJs(target: KotlinJsTarget) :
         val nodeJs = NodeJsRootPlugin.apply(project.rootProject)
 
         val compileKotlinTask = compilation.compileKotlinTask
-        val kotlinJsDce = KotlinJsDcePlugin.apply(project, compilation)
+        val kotlinJsDce = applyDce(project, compilation)
 
         val webpack = project.createOrRegisterTask<KotlinWebpack>(disambiguateCamelCased("webpack")) {
             it.dependsOn(
@@ -98,6 +99,29 @@ class KotlinBrowserJs(target: KotlinJsTarget) :
                     )
                 }
         }
+    }
+
+    private fun applyDce(project: Project, kotlinCompilation: KotlinJsCompilation): KotlinJsDce {
+        val kotlinTask = kotlinCompilation.compileKotlinTask
+        val dceTask = project.createOrRegisterTask<KotlinJsDce>(disambiguateCamelCased("dce")) {
+            it.dependsOn(kotlinTask)
+            project.tasks.findByName("build")!!.dependsOn(it)
+        }.doGetTask()
+
+        val npmProject = kotlinCompilation.npmProject
+        dceTask.destinationDir = npmProject.dir.resolve(KotlinJsDce.DEFAULT_OUT_DIR)
+
+        project.afterEvaluate {
+
+            val configuration = project.configurations.getByName(kotlinCompilation.compileDependencyConfigurationName)
+
+            with(dceTask) {
+                classpath = configuration
+                source(kotlinTask.outputFile)
+            }
+        }
+
+        return dceTask
     }
 
     private fun TaskHolder<KotlinWebpack>.activateDce(

@@ -30,7 +30,7 @@ import org.jetbrains.kotlin.gradle.logging.GradleKotlinLogger
 import java.io.File
 
 @CacheableTask
- open class KotlinJsDce : AbstractKotlinCompileTool<K2JSDceArguments>(), KotlinJsDce {
+open class KotlinJsDce : AbstractKotlinCompileTool<K2JSDceArguments>(), KotlinJsDce {
 
     init {
         cacheOnlyIfEnabledForKotlin()
@@ -68,7 +68,9 @@ import java.io.File
 
     @TaskAction
     fun performDce() {
-        val inputFiles = (listOf(source) + classpath.map { project.fileTree(it) })
+        val inputFiles = (listOf(source) + classpath
+            .filter { it.extension == "jar" }
+            .map { project.fileTree(it) })
             .reduce(FileTree::plus)
             .files.map { it.path }
 
